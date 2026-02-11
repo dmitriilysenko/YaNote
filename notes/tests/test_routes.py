@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from pytils.translit import slugify
 from notes.models import Note
 
 User = get_user_model()
@@ -62,6 +61,7 @@ class TestRoutes(TestCase):
             'notes:detail': True,
             'notes:add': False,
             'notes:list': False,
+            'notes:success': False,
         }
         # В цикле перебираем имена страниц, с которых ожидаем редирект:
         for name, slug_req in url_config.items():
