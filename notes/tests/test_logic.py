@@ -5,9 +5,6 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-
-# Импортируем из файла с формами список стоп-слов и предупреждение формы.
-# Загляните в news/forms.py, разберитесь с их назначением.
 from notes.forms import WARNING
 from notes.models import Note
 
@@ -32,7 +29,10 @@ class TestNoteCreation(TestCase):
         }
 
     def test_anonymous_user_cant_create_note(self):
-        self.client.post(self.url, data=self.form_data)
+        login_url = reverse('users:login')
+        response = self.client.post(self.url, data=self.form_data)
+        redirect_url = f'{login_url}?next={self.url}'
+        self.assertRedirects(response, redirect_url)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 0)
 
@@ -62,6 +62,19 @@ class TestNoteCreation(TestCase):
         )
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
+
+    def test_slug_is_slugify(self):
+        form_data = {
+            'title': 'Слагифай-специфичный заголовок',
+            'text': 'Слагифай-специфичный текст',
+        }
+        response = self.auth_client.post(self.url, data=form_data)
+        self.assertRedirects(response, reverse('notes:success'))
+        self.assertEqual(Note.objects.count(), 1)
+        note = Note.objects.get()
+        expected_slug = slugify(form_data['title'])[:100]
+        self.assertEqual(note.slug, expected_slug)
+
 
 class TestNoteEditDelete(TestCase):
 

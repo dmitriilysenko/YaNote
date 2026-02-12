@@ -21,16 +21,34 @@ class TestRoutes(TestCase):
             text='Текст заметки'
         )
 
-    def test_pages_availability(self):
+    def test_anonymous_pages_availability(self):
         urls = (
-            ('notes:home', None),
-            # ('notes:detail', (self.note.slug,)),
-            ('users:login', None),
-            ('users:signup', None),
+            'notes:home',
+            'users:login',
+            'users:signup',
+            'users:logout',
         )
-        for name, args in urls:
+        counter = 0
+        for name in urls:
+            counter += 1
             with self.subTest(name=name):
-                url = reverse(name, args=args)
+                url = reverse(name)
+                if name == 'users:logout':
+                    response = self.client.post(url)
+                else:
+                    response = self.client.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_user_pages_availability(self):
+        urls = (
+            'notes:add',
+            'notes:list',
+            'notes:success',
+        )
+        self.client.force_login(self.reader)
+        for name in urls:
+            with self.subTest(name=name):
+                url = reverse(name)
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -43,10 +61,7 @@ class TestRoutes(TestCase):
         urls = ('notes:edit', 'notes:delete', 'notes:detail')
 
         for user, status in users_statuses:
-            # Логиним пользователя в клиенте:
             self.client.force_login(user)
-            # Для каждой пары "пользователь - ожидаемый ответ"
-            # перебираем имена тестируемых страниц:
             for name in urls:
                 with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.note.slug,))
