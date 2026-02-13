@@ -5,7 +5,9 @@ from django.contrib.auth import get_user_model
 from notes.forms import NoteForm
 from notes.models import Note
 
+
 User = get_user_model()
+
 
 class TestListPage(TestCase):
 
@@ -32,7 +34,10 @@ class TestListPage(TestCase):
         notes_in_context = response.context['object_list']
         list_ids = [note.id for note in notes_in_context]
         sorted_ids = sorted(list_ids)
-        self.assertEqual(list_ids, sorted_ids, 'Заметки должны быть отсортированы по id (от меньшего к большему)')
+        self.assertEqual(
+            list_ids, sorted_ids,
+            'Заметки должны быть отсортированы по id (от меньшего к большему)'
+        )
 
     def test_notes_in_list(self):
         users_statuses = (
@@ -51,7 +56,10 @@ class TestListPage(TestCase):
                 else:
                     self.assertNotIn(note, notes_in_context)
             if should_see:
-                self.assertEqual(notes_in_context.count(), author_notes.count())
+                self.assertEqual(
+                    notes_in_context.count(),
+                    author_notes.count()
+                )
             else:
                 self.assertEqual(notes_in_context.count(), 0)
 
@@ -70,4 +78,4 @@ class TestListPage(TestCase):
                     url = reverse(name)
         response = self.client.get(url)
         self.assertIn('form', response.context)
-        self.assertIsInstance(response.context['form'], NoteForm) 
+        self.assertIsInstance(response.context['form'], NoteForm)

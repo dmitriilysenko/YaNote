@@ -8,6 +8,7 @@ from django.urls import reverse
 from notes.forms import WARNING
 from notes.models import Note
 
+
 User = get_user_model()
 
 
